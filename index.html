@@ -1,61 +1,149 @@
-<html lang="en"> 
-  
-<head> 
-    <meta charset="UTF-8" /> 
-    <meta name="viewport" 
-          content="width=device-width,  
-                   initial-scale=1.0" /> 
-    <link rel="stylesheet" href="style.css" /> 
-    <title>Password Generator</title> 
-</head> 
-  
-<body> 
-    <h1>Password Generator</h1> 
-    <div class="generator"> 
-        <div class="password"> 
-            <input type="text" value="test" /> 
-            <button>copy</button> 
-        </div> 
-        <div class="range"> 
-            <input type="range" min="4" 
-                   max="24" value="8" /> 
-            <span>8</span> 
-        </div> 
-        <div class="options"> 
-            <div class="option"> 
-                <label> 
-                    <input type="checkbox" 
-                           id="lowercaseCb" checked /> 
-                    <span>a-z</span> 
-                </label> 
-            </div> 
-            <div class="option"> 
-                <label> 
-                    <input type="checkbox" 
-                           id="uppercaseCb" /> 
-                    <span>A-Z</span> 
-                </label> 
-            </div> 
-            <div class="option"> 
-                <label> 
-                    <input type="checkbox" 
-                           id="digitsCb" /> 
-                    <span>0-9</span> 
-                </label> 
-            </div> 
-            <div class="option"> 
-                <label> 
-                    <input type="checkbox" 
-                           id="specialsCb" /> 
-                    <span>!@$#%^</span> 
-                </label> 
-            </div> 
-        </div> 
-        <button class="generate"> 
-            generate 
-        </button> 
-    </div> 
-    <script src="script.js"></script> 
-</body> 
-  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 400px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .button:disabled {
+            background-color: #ccc;
+        }
+        .password-list {
+            margin-top: 20px;
+        }
+        .password-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        .edit-btn {
+            background-color: #28a745;
+            color: #fff;
+            padding: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Password Manager</h1>
+        <label for="siteName">Site Name:</label>
+        <input type="text" id="siteName" placeholder="Enter site name">
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" placeholder="Generate or enter password">
+        
+        <button class="button" onclick="generatePassword()">Generate Password</button>
+        <button class="button" onclick="addOrEditPassword()" id="addEditBtn">Add Password</button>
+        
+        <div class="password-list" id="passwordList"></div>
+    </div>
+
+    <script>
+        let passwords = [];
+        let editIndex = -1;
+
+        function generatePassword() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+            let password = "";
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById("password").value = password;
+        }
+
+        function addOrEditPassword() {
+            const siteName = document.getElementById("siteName").value;
+            const password = document.getElementById("password").value;
+
+            if (!siteName || !password) {
+                alert("Please fill out both fields.");
+                return;
+            }
+
+            if (editIndex === -1) {
+                // Add new password
+                passwords.push({ siteName, password });
+            } else {
+                // Edit existing password
+                passwords[editIndex] = { siteName, password };
+                editIndex = -1;
+                document.getElementById("addEditBtn").innerText = "Add Password";
+            }
+
+            document.getElementById("siteName").value = "";
+            document.getElementById("password").value = "";
+            renderPasswordList();
+        }
+
+        function renderPasswordList() {
+            const passwordList = document.getElementById("passwordList");
+            passwordList.innerHTML = "";
+
+            passwords.forEach((item, index) => {
+                const div = document.createElement("div");
+                div.className = "password-item";
+                div.innerHTML = `
+                    <span><strong>${item.siteName}</strong>: ${item.password}</span>
+                    <button class="edit-btn" onclick="editPassword(${index})">Edit</button>
+                `;
+                passwordList.appendChild(div);
+            });
+        }
+
+        function editPassword(index) {
+            document.getElementById("siteName").value = passwords[index].siteName;
+            document.getElementById("password").value = passwords[index].password;
+            editIndex = index;
+            document.getElementById("addEditBtn").innerText = "Save Changes";
+        }
+    </script>
+</body>
 </html>
