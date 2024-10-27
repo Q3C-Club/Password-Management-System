@@ -1,59 +1,57 @@
-function generate() { 
-    let dictionary = ""; 
-    if (document.getElementById("lowercaseCb").checked) { 
-        dictionary += "qwertyuiopasdfghjklzxcvbnm"; 
-    } 
-    if (document.getElementById("uppercaseCb").checked) { 
-        dictionary += "QWERTYUIOPASDFGHJKLZXCVBNM"; 
-    } 
-    if (document.getElementById("digitsCb").checked) { 
-        dictionary += "1234567890"; 
-    } 
-    if (document.getElementById("specialsCb").checked) { 
-        dictionary += "!@#$%^&*()_+-={}[];<>:"; 
-    } 
-    const length = document.querySelector( 
-        'input[type="range"]').value; 
-  
-    if (length < 1 || dictionary.length === 0) { 
-        return; 
-    } 
-  
-    let password = ""; 
-    for (let i = 0; i < length; i++) { 
-        const pos = Math.floor(Math.random() * dictionary.length); 
-        password += dictionary[pos]; 
-    } 
-  
-    document.querySelector( 
-        'input[type="text"]').value = password; 
-} 
-  
-[ 
-    ...document.querySelectorAll( 
-        'input[type="checkbox"], button.generate'), 
-].forEach((elem) => { 
-    elem.addEventListener("click", generate); 
-}); 
-  
-document.querySelector('input[type="range"]').addEventListener( 
-    "input", (e) => { 
-        document.querySelector( 
-            "div.range span").innerHTML = e.target.value; 
-        generate(); 
-    }); 
-  
-document.querySelector("div.password button").addEventListener( 
-    "click", () => { 
-        const pass = document.querySelector('input[type="text"]').value; 
-        navigator.clipboard.writeText(pass).then(() => { 
-            document.querySelector( 
-                "div.password button").innerHTML = "copied!"; 
-            setTimeout(() => { 
-                document.querySelector( 
-                    "div.password button").innerHTML = "copy"; 
-            }, 1000); 
-        }); 
-    }); 
-  
-generate();
+let passwords = [];
+let editIndex = -1;
+
+function generatePassword() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+    let password = "";
+    for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById("password").value = password;
+}
+
+function addOrEditPassword() {
+    const siteName = document.getElementById("siteName").value;
+    const password = document.getElementById("password").value;
+
+    if (!siteName || !password) {
+        alert("Please fill out both fields.");
+        return;
+    }
+
+    if (editIndex === -1) {
+        // Add new password
+        passwords.push({ siteName, password });
+    } else {
+        // Edit existing password
+        passwords[editIndex] = { siteName, password };
+        editIndex = -1;
+        document.getElementById("addEditBtn").innerText = "Add Password";
+    }
+
+    document.getElementById("siteName").value = "";
+    document.getElementById("password").value = "";
+    renderPasswordList();
+}
+
+function renderPasswordList() {
+    const passwordList = document.getElementById("passwordList");
+    passwordList.innerHTML = "";
+
+    passwords.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "password-item";
+        div.innerHTML = `
+            <span><strong>${item.siteName}</strong>: ${item.password}</span>
+            <button class="edit-btn" onclick="editPassword(${index})">Edit</button>
+        `;
+        passwordList.appendChild(div);
+    });
+}
+
+function editPassword(index) {
+    document.getElementById("siteName").value = passwords[index].siteName;
+    document.getElementById("password").value = passwords[index].password;
+    editIndex = index;
+    document.getElementById("addEditBtn").innerText = "Save Changes";
+}
